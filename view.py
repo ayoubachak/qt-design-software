@@ -4,6 +4,17 @@ from PyQt5 import QtCore,QtGui,QtWidgets
 from Utils.tools import Tool
 from PyQt5.QtGui import QPolygonF
 
+class EditableTextItem(QtWidgets.QGraphicsTextItem):
+    def __init__(self, text="Double-click to edit text"):
+        super().__init__(text)
+        self.setFlag(QtWidgets.QGraphicsTextItem.ItemIsSelectable)
+        self.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
+
+    def focusOutEvent(self, event):
+        self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
+        super().focusOutEvent(event)
+
+
 
 class View (QtWidgets.QGraphicsView) :
     def __init__(self,position=(0,0),dimension=(600,400)):
@@ -14,11 +25,12 @@ class View (QtWidgets.QGraphicsView) :
 
         self.begin,self.end=QtCore.QPoint(0,0),QtCore.QPoint(0,0)
         self.offset=QtCore.QPoint(0,0)
-        self.tool="line"
+        self.tool=Tool.LINE
         self.item=None
         self.polygonPointsSets = []  # Initialize an empty list for sets of polygon points
         self.currentPolygonPoints = []  # Current working polygon points
         self.pen,self.brush=None,None
+        self.pen_thickness = 1
         self.create_style()
 
     def __repr__(self):
@@ -54,6 +66,12 @@ class View (QtWidgets.QGraphicsView) :
     def select_brush_color(self,color) :
         print("View.set_brush_color(self,color)",color)
         self.brush.setColor(QtGui.QColor(color))
+    def set_pen_thickness(self, thickness):
+        self.pen_thickness = thickness
+        if self.pen:
+            self.pen.setWidth(self.pen_thickness)
+            self.update()
+
     # events
     def mousePressEvent(self, event):
         print("View.mousePressEvent()")
@@ -108,11 +126,13 @@ class View (QtWidgets.QGraphicsView) :
                 ellipse.setBrush(self.brush)
                 self.scene().addItem(ellipse)
 
+            
             elif self.tool == Tool.TEXT:
-                textItem = QtWidgets.QGraphicsTextItem("Double-click to edit text")
+                # Create an EditableTextItem instead of a regular QGraphicsTextItem
+                textItem = EditableTextItem("Double-click to edit text")
                 textItem.setPos(self.begin)
-                textItem.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)  # Enable text editing
                 self.scene().addItem(textItem)
+
 
             elif self.tool == Tool.POLYGON and self.scene():
                 if len(self.currentPolygonPoints) > 1:
@@ -128,6 +148,14 @@ class View (QtWidgets.QGraphicsView) :
     def mouseDoubleClickEvent(self, event):
         if self.tool == Tool.POLYGON:
             self.finalizeCurrentPolygon()
+        
+        if self.tool == Tool.TEXT:
+            # Find the text item under the mouse cursor
+            text_item = self.scene().itemAt(event.pos(), QtGui.QTransform())
+            if isinstance(text_item, EditableTextItem):
+                # Set the focus to the text item
+                text_item.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
+                text_item.setFocus(QtCore.Qt.MouseFocusReason)
 
     def finalizeCurrentPolygon(self):
         # Finalize the current polygon

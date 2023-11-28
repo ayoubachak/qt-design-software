@@ -1,0 +1,82 @@
+[
+    {
+        "type": "rectangle",
+        "pen": {
+            "color": "#ff0000",
+            "width": 1,
+            "style": 1
+        },
+        "topLeft": {
+            "x": 217.0,
+            "y": 185.0
+        },
+        "bottomRight": {
+            "x": 316.0,
+            "y": 300.0
+        },
+        "brush": {
+            "color": "#0000ff",
+            "style": 14
+        }
+    },
+    {
+        "type": "rectangle",
+        "pen": {
+            "color": "#ff0000",
+            "width": 1,
+            "style": 1
+        },
+        "topLeft": {
+            "x": 76.0,
+            "y": 134.0
+        },
+        "bottomRight": {
+            "x": 159.0,
+            "y": 215.0
+        },
+        "brush": {
+            "color": "#0000ff",
+            "style": 1
+        }
+    },
+    {
+        "type": "rectangle",
+        "pen": {
+            "color": "#ff0000",
+            "width": 1,
+            "style": 1
+        },
+        "topLeft": {
+            "x": 413.0,
+            "y": 70.0
+        },
+        "bottomRight": {
+            "x": 484.0,
+            "y": 260.0
+        },
+        "brush": {
+            "color": "#0000ff",
+            "style": 1
+        }
+    },
+    {
+        "type": "rectangle",
+        "pen": {
+            "color": "#ff0000",
+            "width": 1,
+            "style": 1
+        },
+        "topLeft": {
+            "x": 181.0,
+            "y": 30.0
+        },
+        "bottomRight": {
+            "x": 300.0,
+            "y": 141.0
+        },
+        "brush": {
+            "color": "#0000ff",
+            "style": 11
+        }
+    }
+]
