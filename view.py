@@ -3,17 +3,34 @@ import sys
 from PyQt5 import QtCore,QtGui,QtWidgets
 from Utils.tools import Tool
 from PyQt5.QtGui import QPolygonF
+from PyQt5.QtCore import Qt
 
 class EditableTextItem(QtWidgets.QGraphicsTextItem):
-    def __init__(self, text="Double-click to edit text"):
+    def __init__(self, text="click to edit text, and press ESC to save"):
         super().__init__(text)
         self.setFlag(QtWidgets.QGraphicsTextItem.ItemIsSelectable)
         self.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
 
     def focusOutEvent(self, event):
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
+        # Save the edited text when focus is lost
+        self.saveText()
         super().focusOutEvent(event)
 
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            # Save the edited text when the Escape key is pressed
+            self.saveText()
+            self.clearFocus()  # Remove focus to end editing
+        else:
+            super().keyPressEvent(event)
+
+    def saveText(self):
+        edited_text = self.toPlainText()
+        # Here, you can implement the logic to save the edited text.
+        # For example, you can update a variable, emit a signal, or
+        # save the text to a file/database.
+        print("Saved text:", edited_text)
 
 
 class View (QtWidgets.QGraphicsView) :
@@ -127,11 +144,18 @@ class View (QtWidgets.QGraphicsView) :
                 self.scene().addItem(ellipse)
 
             
-            elif self.tool == Tool.TEXT:
-                # Create an EditableTextItem instead of a regular QGraphicsTextItem
-                textItem = EditableTextItem("Double-click to edit text")
-                textItem.setPos(self.begin)
-                self.scene().addItem(textItem)
+            if self.tool == Tool.TEXT:
+                # Find the text item under the mouse cursor
+                text_item = self.scene().itemAt(event.pos(), QtGui.QTransform())
+                if isinstance(text_item, EditableTextItem):
+                    # Set the focus to the text item
+                    text_item.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
+                    text_item.setFocus(QtCore.Qt.MouseFocusReason)
+                else:
+                    # Create new text item only if there isn't one
+                    textItem = EditableTextItem()
+                    textItem.setPos(event.pos())
+                    self.scene().addItem(textItem)
 
 
             elif self.tool == Tool.POLYGON and self.scene():
@@ -149,13 +173,6 @@ class View (QtWidgets.QGraphicsView) :
         if self.tool == Tool.POLYGON:
             self.finalizeCurrentPolygon()
         
-        if self.tool == Tool.TEXT:
-            # Find the text item under the mouse cursor
-            text_item = self.scene().itemAt(event.pos(), QtGui.QTransform())
-            if isinstance(text_item, EditableTextItem):
-                # Set the focus to the text item
-                text_item.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
-                text_item.setFocus(QtCore.Qt.MouseFocusReason)
 
     def finalizeCurrentPolygon(self):
         # Finalize the current polygon
@@ -165,6 +182,11 @@ class View (QtWidgets.QGraphicsView) :
             polygonItem.setPen(self.pen)
             self.scene().addItem(polygonItem)
             self.polygonPointsSets.append(self.currentPolygonPoints)
+
+            for line in self.scene().items():
+                if isinstance(line, QtWidgets.QGraphicsLineItem):
+                    self.scene().removeItem(line)
+            
             self.currentPolygonPoints = []  # Clear the current points list for a new polygon
 
     def resizeEvent(self,event):

@@ -1,0 +1,11 @@
+[
+    {
+        "type": "text",
+        "text": "Hello world",
+        "position": {
+            "x": 213.0,
+            "y": 96.0
+        },
+        "color": "#000000"
+    }
+]
